@@ -30,6 +30,14 @@ The following methods are available:
   - **NOTE**: This method installs the latest version available in the package manager and not the version defined in `golang_version`.
 - `dynamic`: Installs golang from package manager if available in the correct version, otherwise installs from source
 
+```yaml
+golang_tools:
+  - name: "github.com/tomnomnom/gf"
+    version: "latest"
+```
+
+The tools to install can be defined in the variable `golang_tools`.
+
 ## Dependencies
 
 None.

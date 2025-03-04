@@ -1,0 +1,11 @@
+---
+- name: Install golang tools
+  block:
+    - name: Ensure golang tools are installed
+      ansible.builtin.command:
+        cmd: "go install {{ plugin.name }}@{{ plugin.version }}"
+        creates: "{{ ansible_env.HOME }}/go/bin/{{ plugin.name }}"
+      changed_when: true
+      loop: "{{ golang_tools }}"
+      loop_control:
+        loop_var: plugin
