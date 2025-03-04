@@ -1,0 +1,64 @@
+---
+- name: Install golang from source
+  block:
+    - name: Import installed golang version check
+      ansible.builtin.include_tasks: noauto_check_installed_version.yml
+      when: golang_installed_version is not defined
+
+    - name: Force install if the version numbers do not match
+      ansible.builtin.set_fact:
+        golang_force_install: true
+      when:
+        - golang_installed_version is defined
+        - golang_installed_version != golang_version
+
+    - name: Install golang from source
+      when: golang_installed_version is not defined or golang_force_install
+      block:
+        - name: Uninstall current golang installation
+          ansible.builtin.include_tasks: noauto_uninstall.yml
+
+        - name: Download golang package
+          ansible.builtin.get_url:
+            url: "{{ golang_download_url }}"
+            dest: "{{ golang_download_dir }}"
+            checksum: "{{ golang_download_checksum }}"
+            mode: "0755"
+            owner: root
+            group: root
+          become: true
+
+        - name: Ensure golang installation folder exists
+          ansible.builtin.file:
+            path: "{{ golang_install_path }}"
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+          become: true
+
+        - name: Extract archive
+          ansible.builtin.unarchive:
+            src: "{{ golang_download_dir }}/{{ golang_archive_name }}.tar.gz"
+            dest: "{{ golang_install_path }}"
+            remote_src: true
+            extra_opts: ["--strip-components=1"]
+            creates: "{{ golang_install_path }}/bin/go"
+          become: true
+
+        - name: Create golang symlink
+          ansible.builtin.file:
+            src: "{{ golang_install_path }}/bin/go"
+            dest: "/usr/local/bin/go"
+            state: link
+            force: true
+            mode: "0755"
+            owner: root
+            group: root
+          become: true
+
+        - name: Remove archive
+          ansible.builtin.file:
+            path: "{{ golang_download_dir }}/{{ golang_archive_name }}.tar.gz"
+            state: absent
+          become: true

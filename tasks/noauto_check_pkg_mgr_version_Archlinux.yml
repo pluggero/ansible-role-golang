@@ -1,0 +1,29 @@
+---
+- name: Ensure we are using pacman
+  ansible.builtin.fail:
+    msg: "This role only supports {{ ansible_os_family }} systems that use pacman as a package manager."
+  when: ansible_pkg_mgr != "pacman"
+
+- name: Checks golang version in package manager
+  when: ansible_pkg_mgr == "pacman"
+  block:
+    - name: Update pacman cache
+      community.general.pacman:
+        update_cache: true
+      become: true
+
+    - name: Get golang version from package manager
+      ansible.builtin.command:
+        cmd: "pacman -Si {{ golang_distro_pkgs[0] }}"
+      changed_when: false
+      failed_when: false
+      ignore_errors: true
+      register: golang_pkg_mgr_version_cmd
+
+    - name: Extract only the version into a variable
+      ansible.builtin.set_fact:
+        golang_pkg_mgr_version: "{{ (golang_pkg_mgr_version_cmd.stdout | regex_search('Version.*?([\\d\\.]+)', '\\1', multiline=True))[0] }}"
+
+    - name: Debug golang version from package manager
+      ansible.builtin.debug:
+        var: golang_pkg_mgr_version

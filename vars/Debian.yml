@@ -1,0 +1,5 @@
+---
+golang_dep_pkgs: []
+
+golang_distro_pkgs:
+  - golang

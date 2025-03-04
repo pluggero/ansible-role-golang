@@ -1,0 +1,18 @@
+---
+- name: Check installed golang version
+  block:
+    - name: Get installed golang version
+      ansible.builtin.command:
+        cmd: "go version"
+      ignore_errors: true
+      changed_when: false
+      failed_when: false
+      register: golang_installed_version_cmd
+
+    - name: Extract only the version into a variable
+      ansible.builtin.set_fact:
+        golang_installed_version: "{{ (golang_installed_version_cmd.stdout | regex_search('go([\\d.]+)', '\\1'))[0] | default('') }}"
+
+    - name: Debug installed golang version
+      ansible.builtin.debug:
+        var: golang_installed_version

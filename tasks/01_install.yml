@@ -1,0 +1,31 @@
+---
+- name: Install golang
+  block:
+    - name: Include OS-specific variables
+      ansible.builtin.include_vars: "{{ var_file }}"
+      with_first_found:
+        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+        - "{{ ansible_distribution }}.yml"
+        - "{{ ansible_os_family }}.yml"
+        - "{{ ansible_lsb.id }}.yml"
+      loop_control:
+        loop_var: var_file
+
+    - name: Install golang
+      ansible.builtin.include_tasks:
+        file: noauto_install_{{ golang_install_method }}.yml
+
+    - name: Add golang tool path script in /etc/profile.d
+      ansible.builtin.copy:
+        dest: /etc/profile.d/go_path.sh
+        content: |
+          #!/bin/sh
+          # Add Golang Tool bin to the PATH for all users
+          if [ -d "$HOME/go/bin" ]; then
+              PATH="$HOME/go/bin:$PATH"
+          fi
+        mode: "0644"
+        owner: root
+        group: root
+      become: true
