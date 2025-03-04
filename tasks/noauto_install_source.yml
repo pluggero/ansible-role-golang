@@ -39,7 +39,7 @@
 
         - name: Extract archive
           ansible.builtin.unarchive:
-            src: "{{ golang_download_dir }}/{{ golang_archive_name }}.tar.gz"
+            src: "{{ golang_download_dir }}/{{ golang_archive_name }}"
             dest: "{{ golang_install_path }}"
             remote_src: true
             extra_opts: ["--strip-components=1"]
@@ -59,6 +59,6 @@
 
         - name: Remove archive
           ansible.builtin.file:
-            path: "{{ golang_download_dir }}/{{ golang_archive_name }}.tar.gz"
+            path: "{{ golang_download_dir }}/{{ golang_archive_name }}"
             state: absent
           become: true
