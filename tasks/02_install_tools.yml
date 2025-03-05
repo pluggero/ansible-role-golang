@@ -1,11 +1,50 @@
 ---
 - name: Install golang tools
   block:
+    - name: Check if version file exists
+      ansible.builtin.stat:
+        path: "{{ golang_tool_version_file }}"
+      register: golang_tool_file
+
+    - name: Read golang tool version file
+      ansible.builtin.slurp:
+        src: "{{ golang_tool_version_file }}"
+      register: golang_tool_version_file_content
+      when: golang_tool_file.stat.exists
+
+    - name: Parse golang tool versions
+      ansible.builtin.set_fact:
+        golang_tool_installed_versions: "{{ (golang_tool_version_file_content.content | b64decode | from_json) if golang_tool_file.stat.exists else {} }}"
+
     - name: Ensure golang tools are installed
       ansible.builtin.command:
         cmd: "go install {{ plugin.name }}@{{ plugin.version }}"
-        creates: "{{ ansible_env.HOME }}/go/bin/{{ plugin.name }}"
+        creates: "{{ golang_tool_install_dir }}/{{ plugin.name }}"
+      register: golang_tool_install_result
       changed_when: true
       loop: "{{ golang_tools }}"
       loop_control:
         loop_var: plugin
+      failed_when: "'invalid version' in golang_tool_install_result.stderr"
+      when: >
+        plugin.name not in golang_tool_installed_versions or
+        golang_tool_installed_versions[plugin.name] != plugin.version
+
+    - name: Update installed versions
+      ansible.builtin.set_fact:
+        golang_tool_installed_versions: "{{ golang_tool_installed_versions | combine({plugin.name: plugin.version}) }}"
+      loop: "{{ golang_tools }}"
+      loop_control:
+        loop_var: plugin
+      when: >
+        plugin.name not in golang_tool_installed_versions or
+        golang_tool_installed_versions[plugin.name] != plugin.version
+
+    - name: Update tool version file
+      ansible.builtin.copy:
+        content: "{{ golang_tool_installed_versions | to_nice_json }}"
+        dest: "{{ golang_tool_version_file }}"
+        mode: 0644
+        owner: root
+        group: root
+      become: true
