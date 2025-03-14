@@ -1,6 +1,14 @@
 ---
 - name: Install golang tools
   block:
+    - name: Ensure golang tool install directory exists
+      ansible.builtin.file:
+        path: "{{ golang_tool_install_dir }}"
+        state: directory
+        mode: "0755"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
     - name: Check if version file exists
       ansible.builtin.stat:
         path: "{{ golang_tool_version_file }}"
