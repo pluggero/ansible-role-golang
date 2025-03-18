@@ -22,7 +22,7 @@
 
     - name: Extract only the version into a variable
       ansible.builtin.set_fact:
-        golang_pkg_mgr_version: "{{ (golang_pkg_mgr_version_cmd.stdout | regex_search('Version.*?([\\d\\.]+)', '\\1', multiline=True))[0] }}"
+        golang_pkg_mgr_version: "{{ (golang_pkg_mgr_version_cmd.stdout | regex_search('Version.*?([\\d\\.]{2,})', '\\1', multiline=True))[0] }}"
 
     - name: Debug golang version from package manager
       ansible.builtin.debug:
