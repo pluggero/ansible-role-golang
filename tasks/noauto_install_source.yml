@@ -31,10 +31,6 @@
               ansible.builtin.set_fact:
                 golang_releases: "{{ golang_releases_response.content | from_json }}"
 
-            - name: Debug golang releases
-              ansible.builtin.debug:
-                msg: "Golang releases: {{ golang_releases }}"
-
             - name: Set go_version_prefixed
               ansible.builtin.set_fact:
                 golang_version_prefixed: "go{{ golang_version }}"
@@ -52,10 +48,6 @@
                     | list
                     | first
                   }}
-
-            - name: Debug golang release data
-              ansible.builtin.debug:
-                msg: "Golang release data: {{ golang_release_data }}"
 
             - name: Set release facts
               ansible.builtin.set_fact:
