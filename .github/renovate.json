@@ -28,8 +28,7 @@
       ],
       "datasourceTemplate": "custom.golang-version",
       "depNameTemplate": "golang-version",
-      "versioningTemplate": "semver",
-      "extractVersionTemplate": "go(?<currentValue>[\\d\\.]+)"
+      "versioningTemplate": "semver"
     }
   ],
   "customDatasources": {
@@ -37,7 +36,7 @@
       "defaultRegistryUrlTemplate": "https://go.dev/dl/?mode=json",
       "format": "json",
       "transformTemplates": [
-        "{ \"releases\": $map($filter($, function($v) { $v.stable = true }), function($v) { { \"version\": $v.version } })}"
+        "{ \"releases\": $map($filter($, function($v) { $v.stable = true }), function($v) { { \"version\": $substringAfter($v.version, \"go\") } }) }"
       ]
     }
   }
