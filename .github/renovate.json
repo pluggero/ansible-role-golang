@@ -26,27 +26,19 @@
       "matchStrings": [
         "golang_version:\\s+\"(?<currentValue>[\\d\\.]+)\""
       ],
-      "datasourceTemplate": "custom.golang",
-      "depNameTemplate": "golang",
+      "datasourceTemplate": "custom.golang-version",
+      "depNameTemplate": "golang-version",
       "versioningTemplate": "semver",
       "extractVersionTemplate": "go(?<currentValue>[\\d\\.]+)"
     }
   ],
   "customDatasources": {
-    "golang": {
+    "golang-version": {
       "defaultRegistryUrlTemplate": "https://go.dev/dl/?mode=json",
       "format": "json",
       "transformTemplates": [
         "{ \"releases\": $map($filter($, function($v) { $v.stable = true }), function($v) { { \"version\": $v.version } })}"
       ]
     }
-  },
-  "packageRules": [
-    {
-      "matchPackageNames": [
-        "golang"
-      ],
-      "groupName": "Update golang version"
-    }
-  ]
+  }
 }
