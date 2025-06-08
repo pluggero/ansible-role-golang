@@ -1,0 +1,43 @@
+{
+  "extends": [
+    "config:best-practices",
+    ":disableRateLimiting"
+  ],
+  "enabledManagers": [
+    "github-actions",
+    "pip_requirements",
+    "custom.regex",
+    "ansible-galaxy"
+  ],
+  "ansible-galaxy": {
+    "managerFilePatterns": [
+      "/^requirements\\.ya?ml$/"
+    ]
+  },
+  "assignees": [
+    "pluggero"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^defaults/main\\.yml$/"
+      ],
+      "matchStrings": [
+        "golang_version:\\s+\"(?<currentValue>[\\d\\.]+)\""
+      ],
+      "datasourceTemplate": "custom.golang",
+      "depNameTemplate": "golang",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "customDatasources": {
+    "golang": {
+      "defaultRegistryUrlTemplate": "https://go.dev/dl/?mode=json",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": $map($filter($, function($v) { $v.stable = true }), function($v) { $v.version }) }"
+      ]
+    }
+  }
+}
