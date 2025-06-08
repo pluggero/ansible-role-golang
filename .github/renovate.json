@@ -28,7 +28,8 @@
       ],
       "datasourceTemplate": "custom.golang",
       "depNameTemplate": "golang",
-      "versioningTemplate": "semver"
+      "versioningTemplate": "semver",
+      "extractVersionTemplate": "go(?<currentValue>[\\d\\.]+)"
     }
   ],
   "customDatasources": {
