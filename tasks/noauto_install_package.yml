@@ -1,14 +1,43 @@
 ---
-- name: Uninstall current golang installation
-  ansible.builtin.include_tasks: noauto_uninstall.yml
+- name: Install alacritty OS-specifically via package
+  block:
+    - name: Import installed golang version check
+      ansible.builtin.include_tasks: noauto_check_installed_version.yml
+      when: golang_installed_version is not defined
 
-- name: Install golang OS-specifically via package
-  ansible.builtin.include_tasks: "{{ task_file }}"
-  with_first_found:
-    - "noauto_install_{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-    - "noauto_install_{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
-    - "noauto_install_{{ ansible_distribution }}.yml"
-    - "noauto_install_{{ ansible_os_family }}.yml"
-    - "noauto_install_{{ ansible_lsb.id }}.yml"
-  loop_control:
-    loop_var: task_file
+    - name: Check alacritty pkg mgr version
+      ansible.builtin.include_tasks: "{{ task_file }}"
+      with_first_found:
+        - "noauto_check_pkg_mgr_version_{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - "noauto_check_pkg_mgr_version_{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+        - "noauto_check_pkg_mgr_version_{{ ansible_distribution }}.yml"
+        - "noauto_check_pkg_mgr_version_{{ ansible_os_family }}.yml"
+        - "noauto_check_pkg_mgr_version_{{ ansible_lsb.id }}.yml"
+      loop_control:
+        loop_var: task_file
+
+    - name: Force install if the version numbers do not match
+      ansible.builtin.set_fact:
+        golang_force_install: true
+      when:
+        - golang_installed_version is defined
+        - golang_pkg_mgr_version is defined
+        - golang_installed_version != golang_version
+
+    - name: Install golang package
+      when: golang_installed_version is not defined or golang_force_install
+      block:
+        - name: Uninstall current golang installation
+          ansible.builtin.include_tasks: noauto_uninstall.yml
+          when: golang_installed_version is defined and golang_installed_version != ""
+
+        - name: Install golang OS-specifically via package
+          ansible.builtin.include_tasks: "{{ task_file }}"
+          with_first_found:
+            - "noauto_install_{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+            - "noauto_install_{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+            - "noauto_install_{{ ansible_distribution }}.yml"
+            - "noauto_install_{{ ansible_os_family }}.yml"
+            - "noauto_install_{{ ansible_lsb.id }}.yml"
+          loop_control:
+            loop_var: task_file
