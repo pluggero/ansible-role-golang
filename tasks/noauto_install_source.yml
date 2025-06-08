@@ -19,11 +19,53 @@
           ansible.builtin.include_tasks: noauto_uninstall.yml
           when: golang_installed_version is defined and golang_installed_version != ""
 
+        - name: Retrieve golang installer checksum
+          block:
+            - name: Retrieve golang release metadata
+              ansible.builtin.uri:
+                url: "https://go.dev/dl/?mode=json&include=all"
+                return_content: yes
+              register: golang_releases_response
+
+            - name: Parse golang release metadata
+              ansible.builtin.set_fact:
+                golang_releases: "{{ golang_releases_response.content | from_json }}"
+
+            - name: Debug golang releases
+              ansible.builtin.debug:
+                msg: "Golang releases: {{ golang_releases }}"
+
+            - name: Set go_version_prefixed
+              ansible.builtin.set_fact:
+                golang_version_prefixed: "go{{ golang_version }}"
+
+            - name: Get release data
+              ansible.builtin.set_fact:
+                golang_release_data: >-
+                  {{
+                    golang_releases
+                    | selectattr('version', 'equalto', golang_version_prefixed)
+                    | map(attribute='files')
+                    | flatten
+                    | selectattr('os', 'equalto', golang_platform)
+                    | selectattr('arch', 'equalto', golang_arch)
+                    | list
+                    | first
+                  }}
+
+            - name: Debug golang release data
+              ansible.builtin.debug:
+                msg: "Golang release data: {{ golang_release_data }}"
+
+            - name: Set release facts
+              ansible.builtin.set_fact:
+                golang_download_checksum: "{{ golang_release_data.sha256 }}"
+
         - name: Download golang package
           ansible.builtin.get_url:
             url: "{{ golang_download_url }}"
             dest: "{{ golang_download_dir }}"
-            checksum: "{{ golang_download_checksum }}"
+            checksum: "sha256:{{ golang_download_checksum }}"
             mode: "0755"
             owner: root
             group: root
