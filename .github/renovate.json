@@ -33,7 +33,7 @@
   ],
   "customDatasources": {
     "golang-version": {
-      "defaultRegistryUrlTemplate": "https://go.dev/dl/?mode=json",
+      "defaultRegistryUrlTemplate": "https://go.dev/dl/?mode=json&include=all",
       "format": "json",
       "transformTemplates": [
         "{ \"releases\": $map($filter($, function($v) { $v.stable = true }), function($v) { { \"version\": $substringAfter($v.version, \"go\") } }) }"
