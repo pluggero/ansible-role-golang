@@ -37,8 +37,15 @@
       "defaultRegistryUrlTemplate": "https://go.dev/dl/?mode=json",
       "format": "json",
       "transformTemplates": [
-        "{ \"releases\": $map($filter($, function($v) { $v.stable = true }), function($v) { $v.version }) }"
+        "{ \"releases\": $map($filter($, function($v) { $v.stable = true }), function($v) { { \"version\": $v.version } })}"
       ]
     }
-  }
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "golang"
+      ]
+    }
+  ]
 }
