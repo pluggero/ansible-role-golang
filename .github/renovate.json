@@ -45,7 +45,8 @@
     {
       "matchPackageNames": [
         "golang"
-      ]
+      ],
+      "groupName": "Update golang version"
     }
   ]
 }
