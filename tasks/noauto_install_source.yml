@@ -24,7 +24,7 @@
             - name: Retrieve golang release metadata
               ansible.builtin.uri:
                 url: "https://go.dev/dl/?mode=json&include=all"
-                return_content: yes
+                return_content: true
               register: golang_releases_response
 
             - name: Parse golang release metadata
