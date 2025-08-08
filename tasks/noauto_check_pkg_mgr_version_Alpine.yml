@@ -1,0 +1,29 @@
+---
+- name: Ensure we are using apk
+  ansible.builtin.fail:
+    msg: "This role only supports {{ ansible_os_family }} systems that use apk as a package manager."
+  when: ansible_pkg_mgr != "apk"
+
+- name: Install golang dependencies via apk
+  block:
+    - name: Update apk cache
+      community.general.apk:
+        update_cache: true
+      changed_when: false # This is valid because we install packages without cache anyway
+      become: true
+
+    - name: Get golang version from package manager
+      ansible.builtin.command:
+        cmd: "apk info {{ golang_distro_pkgs[0] }}"
+      changed_when: false
+      failed_when: false
+      ignore_errors: true
+      register: golang_pkg_mgr_version_cmd
+
+    - name: Extract only the version into a variable
+      ansible.builtin.set_fact:
+        golang_pkg_mgr_version: "{{ (golang_pkg_mgr_version_cmd.stdout | regex_search('-([0-9]+(?:\\.[0-9]+)*)-r[0-9]+', '\\1', multiline=True))[0] }}"
+
+    - name: Debug golang version from package manager
+      ansible.builtin.debug:
+        var: golang_pkg_mgr_version
