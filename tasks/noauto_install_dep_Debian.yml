@@ -4,7 +4,7 @@
     msg: "This role only supports {{ ansible_os_family }} systems that use apt as a package manager."
   when: ansible_pkg_mgr != "apt"
 
-- name: Install golang via apt
+- name: Install golang dependencies via apt
   block:
     - name: Update apt cache
       ansible.builtin.apt:
@@ -12,8 +12,8 @@
         cache_valid_time: 3600
       become: true
 
-    - name: Ensure golang is installed
+    - name: Ensure golang dependencies are installed
       ansible.builtin.apt:
-        name: "{{ golang_distro_pkgs }}"
+        name: "{{ golang_dep_pkgs }}"
         state: present
       become: true

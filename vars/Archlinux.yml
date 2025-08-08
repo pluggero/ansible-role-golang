@@ -1,5 +1,7 @@
 ---
-golang_dep_pkgs: []
+golang_dep_pkgs:
+  - unzip
+  - tar
 
 golang_distro_pkgs:
   - go
