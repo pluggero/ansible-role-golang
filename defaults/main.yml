@@ -1,5 +1,5 @@
 ---
-golang_version: "1.24.6"
+golang_version: "1.25.0"
 golang_install_method: "dynamic"
 golang_force_install: false
 
