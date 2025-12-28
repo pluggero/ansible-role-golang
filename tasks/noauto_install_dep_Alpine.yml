@@ -6,9 +6,14 @@
 
 - name: Install golang dependencies via apk
   block:
+    - name: Update apk cache
+      community.general.apk:
+        update_cache: true
+      changed_when: false # Cache update is a preparatory operation, not a state change
+      become: true
+
     - name: Ensure golang is installed
       community.general.apk:
         name: "{{ golang_dep_pkgs }}"
         state: present
-        no_cache: true
       become: true
