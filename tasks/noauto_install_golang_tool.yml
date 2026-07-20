@@ -1,0 +1,23 @@
+---
+- name: Ensure golang tool is installed
+  ansible.builtin.command:
+    cmd: "go install {{ tool.name }}@{{ tool.version }}"
+    creates: "{{ golang_tool_install_dir }}/{{ tool.name }}"
+  register: golang_tool_install_result
+  changed_when: true
+  failed_when: "'invalid version' in golang_tool_install_result.stderr"
+  when: >
+    tool.name not in golang_tool_installed_versions or
+    golang_tool_installed_versions[tool.name] != tool.version
+
+- name: Report golang tool installed  # noqa: no-handler
+  ansible.builtin.debug:
+    msg: "Installed {{ tool.name }}@{{ tool.version }}"
+  when: golang_tool_install_result.changed | default(false)
+
+- name: Update installed versions
+  ansible.builtin.set_fact:
+    golang_tool_installed_versions: "{{ golang_tool_installed_versions | combine({tool.name: tool.version}) }}"
+  when: >
+    tool.name not in golang_tool_installed_versions or
+    golang_tool_installed_versions[tool.name] != tool.version
